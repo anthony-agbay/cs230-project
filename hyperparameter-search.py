@@ -25,8 +25,8 @@ def label_type(row, thresh_offset):
 def lopo_train_test_split(protein, curr_data):
     """ Splits data into train/test splits by leaving one protein out of training data
     """
-    train_data = curr_data[data.protein != protein].drop(['protein', 'pdb', 'resnum'], axis=1)
-    test_data = curr_data[data.protein == protein].drop(['protein', 'pdb', 'resnum'], axis=1)
+    train_data = curr_data[curr_data.protein != protein].drop(['protein', 'pdb', 'resnum'], axis=1)
+    test_data = curr_data[curr_data.protein == protein].drop(['protein', 'pdb', 'resnum'], axis=1)
     
     # Set up Training Data
     ## Need to one-hot encode labels
@@ -51,7 +51,7 @@ def lopo_train_test_split(protein, curr_data):
 # Model definitions
 def nn_model(num_layers, num_nodes):
     model = Sequential()
-    inputs = Input(shape=(968,))
+    inputs = Input(shape=(969,))
     x = Dense(num_nodes, activation=tf.nn.relu)(inputs)
     for layers in range(num_layers-1):
         x = Dense(num_nodes, activation=tf.nn.relu)(inputs)
@@ -88,13 +88,14 @@ def main():
             for thresholds in label_thresholds:
                 # Generate the Split Training Set
                 data['type'] = data.apply(lambda row: label_type(row, thresholds), axis = 1)
-                data_final = data.drop(['scaled_effect'], axis=1)
+                data_final = data
                 x_train, y_train, x_test, y_test = lopo_train_test_split(protein, data_final)
                 
                 # Build the Model
                 print("Current Model: HL - {} | Nodes - {} | Threshold Offset - {}".format(hl, nodes, thresholds))
+		print(y_test['type'].unique())
                 curr_model = nn_model(hl, nodes)
-                curr_model.fit(x_train, y_train, epochs = 50, batch_size = 10, verbose=1)
+                curr_model.fit(x_train, y_train, epochs = 10, batch_size = 10, verbose=1)
                 
                 # Calculate Evaluation Metrics
                 loss, acc, prec, rec = curr_model.evaluate(x_test, y_test)
