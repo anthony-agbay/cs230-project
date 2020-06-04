@@ -93,21 +93,17 @@ def main():
                 
                 # Build the Model
                 print("Current Model: HL - {} | Nodes - {} | Threshold Offset - {}".format(hl, nodes, thresholds))
-		print(y_test['type'].unique())
+		        print(y_test['type'].unique())
                 curr_model = nn_model(hl, nodes)
                 curr_model.fit(x_train, y_train, epochs = 10, batch_size = 10, verbose=1)
                 
                 # Calculate Evaluation Metrics
                 loss, acc, prec, rec = curr_model.evaluate(x_test, y_test)
-    #             probs = curr_model.predict_proba(x_test)
-    #             predictions = curr_model.predict(x_test)
-    #             precision = precision_score(y_test, predictions, average="macro", zero_division = 0)
-    #             score = curr_model.score(x_test, y_test)
                 
                 # Append to Eval Storage
                 eval_metrics = eval_metrics.append(pd.DataFrame([[hl, nodes, thresholds, loss, acc, prec, rec]], columns=column_list))
+                eval_metrics.to_csv('hyperparamter-eval.csv')
                 
-    eval_metrics.to_csv('hyperparamter-eval.csv')
 
 if __name__ == '__main__':
     main()
