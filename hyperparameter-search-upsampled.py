@@ -11,17 +11,7 @@ from tensorflow.keras.utils import to_categorical
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
 
-# Data preparation functions
-def label_type(row, thresh_offset):
-    """ Converts continuous label to categorical label
-    """
-    if row['scaled_effect'] < 1 - thresh_offset:
-        return('Deleterious')
-    elif row['scaled_effect'] > 1 + thresh_offset:
-        return('Beneficial')
-    else:
-        return('Neutral')
-    
+# Data preparation functions  
 def lopo_train_test_split(protein, curr_data):
     """ Splits data into train/test splits by leaving one protein out of training data
     """
@@ -68,13 +58,13 @@ def nn_model(num_layers, num_nodes):
 
 def main():
     # Reading in Data
-    data_path = 'data/merged.csv'
+    data_path = 'data/upsampled_data.csv'
     data = pd.read_csv(data_path)
 
     # Setup hyperparameter search
     num_hl = [2, 4, 8, 16, 32]
     num_nodes = [25, 100, 400, 800]
-    label_thresholds = [0.2]
+    label_thresholds = [0.05]
 
     # Other Variables to define
     protein = 'Kka2'
