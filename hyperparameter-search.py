@@ -9,7 +9,7 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import confusion_matrix
 from tensorflow.keras.utils import to_categorical
 from sklearn.preprocessing import LabelEncoder
-
+import numpy as np
 
 # Data preparation functions
 def label_type(row, thresh_offset):
@@ -54,7 +54,7 @@ def nn_model(num_layers, num_nodes):
     inputs = Input(shape=(969,))
     x = Dense(num_nodes, activation=tf.nn.relu)(inputs)
     for layers in range(num_layers-1):
-        x = Dense(num_nodes, activation=tf.nn.relu)(inputs)
+        x = Dense(num_nodes, activation=tf.nn.relu)(x)
     outputs = Dense(3, activation=tf.nn.softmax)(x)
     opt = optimizers.Adam(learning_rate = 0.1)
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
@@ -77,7 +77,7 @@ def main():
     label_thresholds = [.025, .05, .1, .2]
 
     # Other Variables to define
-    protein = 'Uba1'
+    protein = 'Kka2'
     column_list = ['Hidden Layers', 'Number Nodes', 'Threshold Offset', 'Loss', 'Accuracy', 'Precision', 'Recall']
 
     # Evaluation Metric Storage
@@ -93,16 +93,14 @@ def main():
                 
                 # Build the Model
                 print("Current Model: HL - {} | Nodes - {} | Threshold Offset - {}".format(hl, nodes, thresholds))
-		        print(y_test['type'].unique())
                 curr_model = nn_model(hl, nodes)
-                curr_model.fit(x_train, y_train, epochs = 10, batch_size = 10, verbose=1)
-                
+                curr_model.fit(x_train, y_train, epochs = 20, batch_size = 10, verbose=1)
                 # Calculate Evaluation Metrics
                 loss, acc, prec, rec = curr_model.evaluate(x_test, y_test)
                 
                 # Append to Eval Storage
                 eval_metrics = eval_metrics.append(pd.DataFrame([[hl, nodes, thresholds, loss, acc, prec, rec]], columns=column_list))
-                eval_metrics.to_csv('hyperparamter-eval.csv')
+                eval_metrics.to_csv('hyperparameter-eval.csv')
                 
 
 if __name__ == '__main__':
