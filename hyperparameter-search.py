@@ -94,7 +94,7 @@ def main():
                 # Build the Model
                 print("Current Model: HL - {} | Nodes - {} | Threshold Offset - {}".format(hl, nodes, thresholds))
                 curr_model = nn_model(hl, nodes)
-                curr_model.fit(x_train, y_train, epochs = 20, batch_size = 10, verbose=1)
+            curr_model.fit(x_train, y_train, epochs = 20, batch_size = 32, verbose=1)
                 # Calculate Evaluation Metrics
                 loss, acc, prec, rec = curr_model.evaluate(x_test, y_test)
                 

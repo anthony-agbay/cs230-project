@@ -41,12 +41,12 @@ def lopo_train_test_split(protein, curr_data):
 # Model definitions
 def nn_model(num_layers, num_nodes):
     model = Sequential()
-    inputs = Input(shape=(969,))
-    x = Dense(num_nodes, activation=tf.nn.relu)(inputs)
+    inputs = Input(shape=(967,))
+    x = Dense(num_nodes, activation=tf.nn.relu, kernel_initializer='random_normal')(inputs)
     for layers in range(num_layers-1):
-        x = Dense(num_nodes, activation=tf.nn.relu)(x)
+        x = Dense(num_nodes, activation=tf.nn.relu, kernel_initializer='random_normal')(x)
     outputs = Dense(3, activation=tf.nn.softmax)(x)
-    opt = optimizers.Adam(learning_rate = 0.1)
+    opt = optimizers.Adam(learning_rate = 0.01)
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
     model.compile(loss='categorical_crossentropy',
                   optimizer=opt,
@@ -60,37 +60,35 @@ def main():
     # Reading in Data
     data_path = 'data/upsampled_data.csv'
     data = pd.read_csv(data_path)
+    data = data.drop(['Unnamed: 0', 'Unnamed: 0.1'], axis=1)
 
     # Setup hyperparameter search
     num_hl = [2, 4, 8, 16, 32]
-    num_nodes = [25, 100, 400, 800]
-    label_thresholds = [0.05]
+    num_nodes = [10, 25, 100, 400, 800]
 
     # Other Variables to define
     protein = 'Kka2'
-    column_list = ['Hidden Layers', 'Number Nodes', 'Threshold Offset', 'Loss', 'Accuracy', 'Precision', 'Recall']
+    column_list = ['Hidden Layers', 'Number Nodes', 'Loss', 'Accuracy', 'Precision', 'Recall']
 
     # Evaluation Metric Storage
     eval_metrics = pd.DataFrame(columns=column_list)
 
     for hl in num_hl:
         for nodes in num_nodes:
-            for thresholds in label_thresholds:
-                # Generate the Split Training Set
-                data['type'] = data.apply(lambda row: label_type(row, thresholds), axis = 1)
-                data_final = data
-                x_train, y_train, x_test, y_test = lopo_train_test_split(protein, data_final)
-                
-                # Build the Model
-                print("Current Model: HL - {} | Nodes - {} | Threshold Offset - {}".format(hl, nodes, thresholds))
-                curr_model = nn_model(hl, nodes)
-                curr_model.fit(x_train, y_train, epochs = 20, batch_size = 10, verbose=1)
-                # Calculate Evaluation Metrics
-                loss, acc, prec, rec = curr_model.evaluate(x_test, y_test)
-                
-                # Append to Eval Storage
-                eval_metrics = eval_metrics.append(pd.DataFrame([[hl, nodes, thresholds, loss, acc, prec, rec]], columns=column_list))
-                eval_metrics.to_csv('hyperparameter-eval.csv')
+            # Generate the Split Training Set
+            data_final = data
+            x_train, y_train, x_test, y_test = lopo_train_test_split(protein, data_final)
+
+            # Build the Model
+            print("Current Model: HL - {} | Nodes - {}".format(hl, nodes))
+            curr_model = nn_model(hl, nodes)
+            curr_model.fit(x_train, y_train, epochs = 5, batch_size = 10, verbose=1)
+            # Calculate Evaluation Metrics
+            loss, acc, prec, rec = curr_model.evaluate(x_test, y_test)
+
+            # Append to Eval Storage
+            eval_metrics = eval_metrics.append(pd.DataFrame([[hl, nodes, loss, acc, prec, rec]], columns=column_list))
+            eval_metrics.to_csv('hyperparameter-upsampled-eval.csv')
                 
 
 if __name__ == '__main__':
