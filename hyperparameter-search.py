@@ -28,23 +28,28 @@ def lopo_train_test_split(protein, curr_data):
     train_data = curr_data[curr_data.protein != protein].drop(['protein', 'pdb', 'resnum'], axis=1)
     test_data = curr_data[curr_data.protein == protein].drop(['protein', 'pdb', 'resnum'], axis=1)
     
-    # Set up Training Data
-    ## Need to one-hot encode labels
     y_train = train_data.type
-    encoder_train = LabelEncoder()
-    encoder_train.fit(y_train)
-    y_train = to_categorical(encoder_train.transform(y_train))
+    encoder = LabelEncoder()
+    encoder.fit(y_train)
+    encoded_y_train = encoder.transform(y_train)
+    y_train_oh = np_utils.to_categorical(encoded_y_train)
     
+    scaler_train = StandardScaler()
     x_train = train_data.drop(['type'], axis=1)
+    x_columns = x_train.columns
+    x_train = scaler_train.fit_transform(x_train)
+    x_train = pd.DataFrame(x_train, columns=x_columns)
     
-    # Set up Tresting Data
-    ## Need to one-hot encode labels
     y_test = test_data.type
-    encoder_test = LabelEncoder()
-    encoder_test.fit(y_test)
-    y_test = to_categorical(encoder_test.transform(y_test))
+    encoder = LabelEncoder()
+    encoder.fit(y_test)
+    encoded_y_test = encoder.transform(y_test)
+    y_test_oh = np_utils.to_categorical(encoded_y_test)
     
+    scaler_test = StandardScaler()
     x_test = test_data.drop(['type'], axis=1)
+    x_test = scaler_test.fit_transform(x_test)
+    x_test = pd.DataFrame(x_test, columns=x_columns)
 
     return x_train, y_train, x_test, y_test
 
@@ -56,7 +61,7 @@ def nn_model(num_layers, num_nodes):
     for layers in range(num_layers-1):
         x = Dense(num_nodes, activation=tf.nn.relu)(x)
     outputs = Dense(3, activation=tf.nn.softmax)(x)
-    opt = optimizers.Adam(learning_rate = 0.1)
+    opt = optimizers.Adam(learning_rate = 0.01)
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
     model.compile(loss='categorical_crossentropy',
                   optimizer=opt,
@@ -72,8 +77,8 @@ def main():
     data = pd.read_csv(data_path)
 
     # Setup hyperparameter search
-    num_hl = [2, 4, 8, 16, 32]
-    num_nodes = [25, 100, 400, 800]
+    num_hl = [2, 4, 6, 8, 10]
+    num_nodes = [25, 50, 100, 200, 400]
     label_thresholds = [0.2]
 
     # Other Variables to define
@@ -94,7 +99,7 @@ def main():
                 # Build the Model
                 print("Current Model: HL - {} | Nodes - {} | Threshold Offset - {}".format(hl, nodes, thresholds))
                 curr_model = nn_model(hl, nodes)
-            curr_model.fit(x_train, y_train, epochs = 20, batch_size = 32, verbose=1)
+            curr_model.fit(x_train, y_train, epochs = 50, batch_size = 64, verbose=1)
                 # Calculate Evaluation Metrics
                 loss, acc, prec, rec = curr_model.evaluate(x_test, y_test)
                 
