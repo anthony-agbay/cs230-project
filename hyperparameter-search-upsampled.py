@@ -5,6 +5,8 @@ import tensorflow as tf
 from tensorflow.keras import optimizers, Input
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.metrics import precision_score
 from sklearn.metrics import confusion_matrix
 from tensorflow.keras.utils import to_categorical
@@ -43,15 +45,17 @@ def lopo_train_test_split(protein, curr_data):
     x_test = scaler_test.fit_transform(x_test)
     x_test = pd.DataFrame(x_test, columns=x_columns)
 
-    return x_train, y_train, x_test, y_test
+    return x_train, y_train_oh, x_test, y_test_oh
 
 # Model definitions
 def nn_model(num_layers, num_nodes):
     model = Sequential()
     inputs = Input(shape=(107,))
     x = Dense(num_nodes, activation=tf.nn.relu, kernel_initializer='random_normal')(inputs)
+    x = Dropout(0.2)(x)
     for layers in range(num_layers-1):
         x = Dense(num_nodes, activation=tf.nn.relu, kernel_initializer='random_normal')(x)
+        x = Dropout(0.2)(x)
     outputs = Dense(3, activation=tf.nn.softmax)(x)
     opt = optimizers.Adam(learning_rate = 0.01)
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
@@ -71,7 +75,7 @@ def main():
 
     # Setup hyperparameter search
     num_hl = [2, 4, 6, 8, 10]
-    num_nodes = [25, 50, 100, 200, 400]
+    num_nodes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
     # Other Variables to define
     protein = 'Kka2'
@@ -79,6 +83,9 @@ def main():
 
     # Evaluation Metric Storage
     eval_metrics = pd.DataFrame(columns=column_list)
+
+    # Model Callbacks
+    my_callbacks = [EarlyStopping(patience=3)]
 
     for hl in num_hl:
         for nodes in num_nodes:
@@ -89,7 +96,7 @@ def main():
             # Build the Model
             print("Current Model: HL - {} | Nodes - {}".format(hl, nodes))
             curr_model = nn_model(hl, nodes)
-            curr_model.fit(x_train, y_train, epochs = 50, batch_size = 64, verbose=1)
+            curr_model.fit(x_train, y_train, epochs = 100, batch_size = 64, callbacks = my_callbacks, verbose=1, validation_data=(x_test, y_test))
             # Calculate Evaluation Metrics
             loss, acc, prec, rec = curr_model.evaluate(x_test, y_test)
 
