@@ -52,10 +52,10 @@ def lopo_train_test_split(protein, curr_data):
 def nn_model(num_layers, num_nodes):
     model = Sequential()
     inputs = Input(shape=(107,))
-    x = Dense(num_nodes, activation=tf.nn.relu, kernel_initializer='random_normal',kernel_regularizer='l2')(inputs)
+    x = Dense(num_nodes, activation=tf.nn.relu, kernel_regularizer='l2')(inputs)
     x = Dropout(0.2)(x)
     for layers in range(num_layers-1):
-        x = Dense(num_nodes, activation=tf.nn.relu, kernel_initializer='random_normal',kernel_regularizer='l2')(x)
+        x = Dense(num_nodes, activation=tf.nn.relu, kernel_regularizer='l2')(x)
         x = Dropout(0.2)(x)
     outputs = Dense(3, activation=tf.nn.softmax)(x)
     opt = optimizers.Adam(learning_rate = 0.001)
