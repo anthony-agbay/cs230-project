@@ -28,11 +28,9 @@ The following is a description of main scripts and files:
 
 #### Baselines
 - **logreg-models:** Logistic Regression models on final merged dataset (Milestone 2)
-- **baseline-models**: 2-layer neural network baselines using *original merged dataset*
 - **baseline-models-upsampled**: 2-layer neural network baselines using *upsampled merged dataset*
 
 #### Hyperparameter Tuning
-- **hyperparameter-search**: Hyperpameter search script using *original merged dataset*
 - **hyperparameter-search-upsampled**: Hyperpameter search script using *upsampled merged dataset*
 - **final-models**: Final model training and evaluation following hyperparameter tuning
 
@@ -40,6 +38,8 @@ The following is a description of main scripts and files:
 ### Archived Files
 - **feature-vec-processing (OLD):** Original FETURE vector processing w/errors, kept for archived reference
 - **logistic-reg-test:** Early logistic regression training using merged data that had errors. Kept for archived reference
+- **baseline-models**: 2-layer neural network baselines using *original merged dataset*, kept for reference
+- **hyperparameter-search**: Hyperpameter search script using *original merged dataset*, kept for reference
 
 ## Protein -> PDB Maps
 Reference PDB information
