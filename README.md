@@ -4,13 +4,13 @@ This is the repository for the CS230 Project
 
 ## Workflow
 
-1. Feature Vector Processing (feature-vec-processing.ipynb)
-2. Data Merging (data-merging.ipynb)
-3. Data Exploration (data0exploration-2.ipynb)
-4. Data Upsampling (data-upsampling.ipynb)
-5. Baseline Models (baseline-models-upsampled.ipynb)
-6. Hyperparameter Tuning (hyperparameter-search-upsampled.py)
-7. Final Model Tuning and Evaluation (final-models.ipynb)
+1. Feature Vector Processing (`feature-vec-processing.ipynb`)
+2. Data Merging (`data-merging.ipynb`)
+3. Data Exploration (`data-exploration-2.ipynb`)
+4. Data Upsampling (`data-upsampling.ipynb`)
+5. Baseline Models (`baseline-models-upsampled.ipynb`)
+6. Hyperparameter Tuning (`hyperparameter-search-upsampled.py`)
+7. Final Model Tuning and Evaluation (`final-models.ipynb`)
 
 ## File Descriptions
 The following is a description of main scripts and files:
