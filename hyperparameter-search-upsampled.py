@@ -23,24 +23,28 @@ def lopo_train_test_split(protein, curr_data):
     train_data = curr_data[curr_data.protein != protein].drop(['protein', 'pdb', 'resnum'], axis=1)
     test_data = curr_data[curr_data.protein == protein].drop(['protein', 'pdb', 'resnum'], axis=1)
     
+    # One-hot encode labels
     y_train = train_data.type
     encoder = LabelEncoder()
     encoder.fit(y_train)
     encoded_y_train = encoder.transform(y_train)
     y_train_oh = np_utils.to_categorical(encoded_y_train)
     
+    # Scale and normalize features
     scaler_train = StandardScaler()
     x_train = train_data.drop(['type'], axis=1)
     x_columns = x_train.columns
     x_train = scaler_train.fit_transform(x_train)
     x_train = pd.DataFrame(x_train, columns=x_columns)
     
+    # One-hot encode labels
     y_test = test_data.type
     encoder = LabelEncoder()
     encoder.fit(y_test)
     encoded_y_test = encoder.transform(y_test)
     y_test_oh = np_utils.to_categorical(encoded_y_test)
     
+    # Scale and normalize features
     scaler_test = StandardScaler()
     x_test = test_data.drop(['type'], axis=1)
     x_test = scaler_test.fit_transform(x_test)
@@ -50,6 +54,8 @@ def lopo_train_test_split(protein, curr_data):
 
 # Model definitions
 def nn_model(num_layers, num_nodes):
+    """ Keras network definition
+    """
     model = Sequential()
     inputs = Input(shape=(107,))
     x = Dense(num_nodes, activation=tf.nn.relu, kernel_regularizer='l2')(inputs)
@@ -85,9 +91,10 @@ def main():
     # Evaluation Metric Storage
     eval_metrics = pd.DataFrame(columns=column_list)
 
-    # Model Callbacks
+    # Model Callbacks for early stopping
     my_callbacks = [EarlyStopping(patience=3)]
 
+    # Run for all hyperparameter combinations
     for hl in num_hl:
         for nodes in num_nodes:
             # Generate the Split Training Set
@@ -98,6 +105,7 @@ def main():
             print("Current Model: HL - {} | Nodes - {}".format(hl, nodes))
             curr_model = nn_model(hl, nodes)
             curr_model.fit(x_train, y_train, epochs = 100, batch_size = 64, callbacks = my_callbacks, verbose=1, validation_data=(x_test, y_test))
+
             # Calculate Evaluation Metrics
             loss, acc, prec, rec = curr_model.evaluate(x_test, y_test)
 
